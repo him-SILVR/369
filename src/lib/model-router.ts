@@ -1,5 +1,5 @@
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const GROQ_MODEL = "llama-3.3-70b-versatile"; // free tier, no card required
+const GROQ_MODEL = "llama-3.3-70b-versatile";
 
 export type TaskType = "chat" | "research" | "code" | "explain";
 
@@ -8,15 +8,32 @@ export interface RouterMessage {
   content: string;
 }
 
-const SYSTEM_PROMPTS: Record<TaskType, string> = {
-  chat: "You are 369, a helpful assistant that combines research and building. Be concise and direct.",
-  research: "You are 369's research engine. Answer with clear, well-organized information. Note when something needs live web data (this will be wired to search in Phase 1).",
-  code: "You are 369's build engine. Generate clean, working, complete code. Prefer full files over fragments.",
-  explain: "You are 369's teaching layer. Explain what was just built in plain, beginner-friendly language. No jargon without defining it.",
+interface RouteConfig {
+  systemPrompt: string;
+  maxTokens: number;
+}
+
+const ROUTES: Record<TaskType, RouteConfig> = {
+  chat: {
+    systemPrompt: "You are 369, a helpful assistant that combines research and building. Be concise and direct.",
+    maxTokens: 1024,
+  },
+  research: {
+    systemPrompt: "You are 369's research engine. Answer with clear, well-organized information, citing sources using [1], [2] etc. matching any web search results provided.",
+    maxTokens: 1536,
+  },
+  code: {
+    systemPrompt: 'You are 369\'s build engine. When asked to build something, respond with ONLY a single valid JSON object, nothing else — no markdown fences, no text before or after. Shape: {"html": "<!DOCTYPE html>...", "explanation": "one short sentence describing what you built"}. The html field must be one complete, self-contained HTML file — inline <style> and <script> tags, no external files, no build step, no npm packages, no import statements. Make it visually clean and functional.',
+    maxTokens: 4096,
+  },
+  explain: {
+    systemPrompt: "You are 369's teaching layer. Explain what was just built in plain, beginner-friendly language. No jargon without defining it.",
+    maxTokens: 1024,
+  },
 };
 
 export async function routeModel(taskType: TaskType, messages: RouterMessage[]): Promise<string> {
-  const systemPrompt = SYSTEM_PROMPTS[taskType];
+  const config = ROUTES[taskType];
 
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
@@ -26,7 +43,8 @@ export async function routeModel(taskType: TaskType, messages: RouterMessage[]):
     },
     body: JSON.stringify({
       model: GROQ_MODEL,
-      messages: [{ role: "system", content: systemPrompt }, ...messages],
+      max_tokens: config.maxTokens,
+      messages: [{ role: "system", content: config.systemPrompt }, ...messages],
     }),
   });
 
