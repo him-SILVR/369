@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { routeModel } from "@/lib/model-router";
+import { routeModel, RouterMessage } from "@/lib/model-router";
 
 export async function POST(req: NextRequest) {
   try {
-    const { prompt } = await req.json();
+    const { messages } = await req.json();
 
-    if (!prompt || typeof prompt !== "string") {
-      return NextResponse.json({ error: "prompt is required" }, { status: 400 });
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return NextResponse.json({ error: "messages array is required" }, { status: 400 });
     }
 
-    const raw = await routeModel("code", [{ role: "user", content: prompt }]);
+    const raw = await routeModel("code", messages as RouterMessage[]);
 
     const cleaned = raw.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
 
