@@ -67,6 +67,33 @@ export default function Home() {
     }
   }
 
+  async function explainBuild(index: number) {
+    const target = messages[index];
+    if (!target.html || loading) return;
+    setLoading(true);
+
+    const explainRequest = [
+      ...messages.slice(0, index + 1).map(({ role, content }) => ({ role, content })),
+      { role: "user", content: `Explain what you just built and why, in plain beginner-friendly language. Here is the code:\n\n${target.html}` },
+    ];
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: explainRequest, taskType: "explain" }),
+      });
+      const data = await res.json();
+      if (data.reply) {
+        setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const loadingLabel = mode === "research" ? "Searching and thinking..." : mode === "build" ? "Building..." : "Thinking...";
   const placeholder = mode === "research" ? "Ask 369 to research anything..." : mode === "build" ? "Describe what to build — or say 'build that' after researching" : "Ask 369 anything...";
 
@@ -95,9 +122,14 @@ export default function Home() {
               </div>
             )}
             {m.html && (
-              <div className="mt-3 bg-white rounded-lg overflow-hidden border border-neutral-700" style={{ height: "400px" }}>
-                <iframe srcDoc={m.html} className="w-full h-full" sandbox="allow-scripts" title="369 build preview" />
-              </div>
+              <>
+                <div className="mt-3 bg-white rounded-lg overflow-hidden border border-neutral-700" style={{ height: "400px" }}>
+                  <iframe srcDoc={m.html} className="w-full h-full" sandbox="allow-scripts" title="369 build preview" />
+                </div>
+                <button onClick={() => explainBuild(i)} className="mt-2 text-xs text-neutral-400 hover:text-blue-400 underline">
+                  Explain this
+                </button>
+              </>
             )}
           </div>
         ))}
