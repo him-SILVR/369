@@ -23,7 +23,7 @@ const ROUTES: Record<TaskType, RouteConfig> = {
     maxTokens: 1536,
   },
   code: {
-    systemPrompt: 'You are 369\'s build engine. When asked to build something, respond with ONLY a single valid JSON object, nothing else — no markdown fences, no text before or after. Shape: {"html": "<!DOCTYPE html>...", "explanation": "one short sentence describing what you built"}. The html field must be one complete, self-contained HTML file — inline <style> and <script> tags, no external files, no build step, no npm packages, no import statements. Make it visually clean and functional.',
+    systemPrompt: 'You are 369\'s build engine. You may receive earlier conversation turns, including research findings from earlier in the thread — use any relevant facts, data, or content from them in what you build. Respond with ONLY a single valid JSON object, nothing else — no markdown fences, no text before or after. Shape: {"html": "<!DOCTYPE html>...", "explanation": "one short sentence describing what you built"}. The html field must be one complete, self-contained HTML file — inline <style> and <script> tags, no external files, no build step, no npm packages, no import statements. Make it visually clean and functional.',
     maxTokens: 4096,
   },
   explain: {
