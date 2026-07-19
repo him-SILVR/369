@@ -54,6 +54,7 @@ export default function Home() {
     <main className="flex flex-col h-screen max-w-2xl mx-auto p-4">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-semibold">369</h1>
+<a href="/build" className="text-sm text-neutral-400 hover:text-blue-400 mr-4">Build →</a>
         <div className="flex gap-1 bg-neutral-900 rounded-lg p-1">
           <button onClick={() => setMode("chat")} className={`px-3 py-1 rounded-md text-sm ${mode === "chat" ? "bg-blue-600" : "text-neutral-400"}`}>Chat</button>
           <button onClick={() => setMode("research")} className={`px-3 py-1 rounded-md text-sm ${mode === "research" ? "bg-blue-600" : "text-neutral-400"}`}>Research</button>
